@@ -18,3 +18,5 @@ Route::get('/', function () {
 Route::auth();
 
 Route::get('/home', 'HomeController@index');
+Route::get('/dashboard/addfile', 'HomeController@addFile');
+Route::post('/dashboard/savefile', 'HomeController@saveFile');
