@@ -3,7 +3,7 @@
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class Filetable extends Migration
+class FileKeyInfo extends Migration
 {
     /**
      * Run the migrations.
@@ -12,12 +12,10 @@ class Filetable extends Migration
      */
     public function up()
     {
-         Schema::create('files', function (Blueprint $table) {
+        Schema::create('FileKeyInfo', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('user_id');
-            $table->string('title');
-            $table->string('filename');
-            $table->timestamps();
+            $table->integer('file_id');
+            $table->string('key');
         });
     }
 
@@ -28,6 +26,6 @@ class Filetable extends Migration
      */
     public function down()
     {
-        Schema::drop('files');
+        Schema::drop('FileKeyInfo');
     }
 }

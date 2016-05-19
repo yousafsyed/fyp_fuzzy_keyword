@@ -10,7 +10,7 @@
                 <h3>Add New File</h3>
                 <p>Upload you file. We can handle any file format up to 2GB.</p>
                 </div>
-
+           
                 <div class="panel-body">
                     @if(isset($resp['error']))
                     <div class="alert alert-danger text-center"  role="alert">
@@ -26,8 +26,8 @@
                         </p>
                     </div>
                     @endif
-                    <form action="/dashboard/savefile" method="post" enctype="multipart/form-data">
-
+                    <form action="{{ url('/dashboard/savefile') }}" method="post" enctype="multipart/form-data">
+                            {!! csrf_field() !!}
                             <div class="form-group {{ $errors->has('file') ? ' has-error' : '' }}">
                                 <label for="file" > Upload File </label>
                                 <input type="file" name="file" id="file" multiple>
@@ -56,7 +56,7 @@
                                     </span>
                                 @endif
                             </div>
-                            <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                             
                             <button type="submit" class="btn btn-primary pull-right" id="">Upload File</button>
 
                     </form>

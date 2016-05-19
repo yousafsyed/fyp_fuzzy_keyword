@@ -4,10 +4,20 @@
  */
 namespace App\Libraries;
 
+use App\NgramModel;
 use Crypt;
 
 class Ngram
 {
+    protected $NgramModel;
+    /**
+     * [__construct]
+     * @param NgramModel $NgramModels
+     */
+    public function __construct(NgramModel $NgramModel)
+    {
+        $this->NgramModel = $NgramModel;
+    }
 
     /**
      * Creats Encrypted Ngrams with OpenSSL (AES-256-CBC)
@@ -15,7 +25,7 @@ class Ngram
      * @return Array
      *
      */
-    public function EncryptedNgrams($String)
+    public function EncryptedNgrams($String,$n=3)
     {
         $ngrams = array();
         $len    = strlen($String);
@@ -23,7 +33,7 @@ class Ngram
             if ($i > ($n - 2)) {
                 $ng = '';
                 for ($j = $n - 1; $j >= 0; $j--) {
-                    $ng .= $word[$i - $j];
+                    $ng .= $String[$i - $j];
                 }
                 $ngrams[] = $ng;
             }
@@ -36,6 +46,26 @@ class Ngram
             $encNgrams[$i++] = Crypt::encrypt($row);
         }
         return $encNgrams;
+    }
+    /**
+     *
+     * @param [Array] $enc_ngrams
+     * @param [String] $key
+     */
+    public function AddNgramsToDB($enc_ngrams, $key)
+    {
+        $data = array();
+        foreach ($enc_ngrams as $ngram) {
+            array_push($data, array("ngram_key" => $ngram, "original_key" => $key));
+        }
+
+        if (count($data)) {
+            $this->NgramModel->insert($data);
+            return true;
+        } else {
+            return false;
+        }
+
     }
 
     /**

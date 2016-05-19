@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests;
 use Illuminate\Http\Request;
+use App\Libraries\FuzzySearch;
 
 class HomeController extends Controller
 {
@@ -33,7 +34,7 @@ class HomeController extends Controller
         return view('AddFile');
     }
 
-    public function saveFile(Request $request)
+    public function saveFile(Request $request,FuzzySearch $FuzzySearch)
     {
         $this->validate($request, [
             'title'  => 'required|max:50',
@@ -41,7 +42,7 @@ class HomeController extends Controller
             "tags"          => 'required',
         ]);
         $request_data = $request->all();
-       // $response     = $products->add_new_product($request_data);
-        return view('dashboard/AddProduct')->with("resp", $response);
+        $response     = $FuzzySearch->addNewFile($request_data);
+        return redirect('dashboard/addfile')->with("resp", $response);
     }
 }
