@@ -1,6 +1,9 @@
 <?php
 /**
  * Generate Encrypted Ngrams and Jaccard Coefficient of strings through this class
+ * @author  Yousaf Syed
+ * @copyright 2016
+ *
  */
 namespace App\Libraries;
 
@@ -21,11 +24,11 @@ class Ngram
 
     /**
      * Creats Encrypted Ngrams with OpenSSL (AES-256-CBC)
-     * @param String
-     * @return Array
+     * @param  String $String [String or word]
+     * @return Array $encNgrams [Encrypted array for Ngrams]
      *
      */
-    public function EncryptedNgrams($String,$n=3)
+    public function EncryptedNgrams($String, $n = 2)
     {
         $ngrams = array();
         $len    = strlen($String);
@@ -49,8 +52,8 @@ class Ngram
     }
     /**
      *
-     * @param [Array] $enc_ngrams
-     * @param [String] $key
+     * @param Array $enc_ngrams
+     * @param String $key
      */
     public function AddNgramsToDB($enc_ngrams, $key)
     {

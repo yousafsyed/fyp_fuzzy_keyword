@@ -1,6 +1,7 @@
 <?php
 /**
- *
+ * @author  Yousaf Syed
+ * @copyright 2016
  */
 namespace App\Libraries;
 
@@ -86,8 +87,8 @@ class FuzzySearch
     }
     /**
      * return the string with spaces and trimed for all special caracters
-     * @param  [string] $string
-     * @return [string]
+     * @param  String $string
+     * @return String
      */
     public function trim($string)
     {
@@ -98,8 +99,8 @@ class FuzzySearch
     }
     /**
      * [product_dir_name description]
-     * @param  [String] $string
-     * @return [String]
+     * @param  String $string
+     * @return String
      */
     public function product_dir_name($string)
     {
@@ -110,8 +111,8 @@ class FuzzySearch
     }
     /**
      * [file_name_and_extension description]
-     * @param  [file] $file
-     * @return [string]
+     * @param  File $file
+     * @return String
      */
     public function file_name_and_extension($file)
     {
