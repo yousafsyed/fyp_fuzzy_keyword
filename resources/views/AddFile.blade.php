@@ -12,19 +12,21 @@
                 </div>
            
                 <div class="panel-body">
-                    @if(isset($resp['error']))
-                    <div class="alert alert-danger text-center"  role="alert">
-                        <p>
-                            {{$resp['error']}}
-                        </p>
-                    </div>
-                    @endif
-                    @if(isset($resp['success']))
-                    <div class="alert alert-success text-center"  role="alert">
-                        <p>
-                            {{$resp['success']}}
-                        </p>
-                    </div>
+                    @if(Session::has('message'))
+                        @if(stristr(Session::get('message'),'Error:') !== false)
+                        <div class="alert alert-danger text-center"  role="alert">
+                            <p>
+                                {{Session::get('message')}}
+                            </p>
+                        </div>
+                        @endif
+                        @if(stristr(Session::get('message'),'Success:') !== false)
+                        <div class="alert alert-success text-center"  role="alert">
+                            <p>
+                               {{Session::get('message')}}
+                            </p>
+                        </div>
+                        @endif
                     @endif
                     <form action="{{ url('/dashboard/savefile') }}" method="post" enctype="multipart/form-data">
                             {!! csrf_field() !!}

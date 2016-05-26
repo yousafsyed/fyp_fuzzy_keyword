@@ -13,8 +13,10 @@ class FileKeyInfoModel extends Model
     {
         $fileKeyInfo = array();
         foreach ($keys as $key) {
-            array_push($fileKeyInfo, ["file_id" => $fileId, "key" => Crypt::encrypt($key)]);
+            array_push($fileKeyInfo, ["file_id" => $fileId, "key" => Crypt::encrypt(strtolower($key))]);
         }
         return $this->insert($fileKeyInfo);
     }
+
+ 
 }

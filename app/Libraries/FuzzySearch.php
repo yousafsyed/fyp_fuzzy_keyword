@@ -8,6 +8,7 @@ namespace App\Libraries;
 use App\FileKeyInfoModel;
 use App\FilesModel;
 use App\Libraries\Ngram;
+use App\NgramModel;
 use Auth;
 use Crypt;
 use File;
@@ -21,12 +22,13 @@ class FuzzySearch
     private $FilesModel;
     private $Ngram;
     private $FileKeyInfoModel;
+    private $NgramModel;
     /**
      *
      * @param FilesModel $FilesModel
      * @param Ngram      $Ngram
      */
-    public function __construct(FilesModel $FilesModel, Ngram $Ngram, FileKeyInfoModel $FileKeyInfoModel)
+    public function __construct(FilesModel $FilesModel, Ngram $Ngram, FileKeyInfoModel $FileKeyInfoModel, NgramModel $NgramModel)
     {
         $this->user_data        = Auth::user();
         $this->user_id          = $this->user_data->id;
@@ -34,6 +36,7 @@ class FuzzySearch
         $this->FilesModel       = $FilesModel;
         $this->Ngram            = $Ngram;
         $this->FileKeyInfoModel = $FileKeyInfoModel;
+        $this->NgramModel       = $NgramModel;
     }
     /**
      * [addNewFile]
@@ -48,10 +51,24 @@ class FuzzySearch
         $tags                       = $this->handleKeysAndEngrams($data['tags']);
         if ($this->FilesModel->save()) {
             $this->FileKeyInfoModel->addKeys($tags, $this->FilesModel->id);
-            return array('success' => "File added Successfully");
+            return "Success: File added Successfully";
         } else {
-            return array('error' => "Some error Occured");
+            return "Error: Something went wrong please contact our support.";
         }
+    }
+    /**
+     * [deleteFile]
+     * @param  String $data
+     * @return String
+     */
+    public function deleteFile($data)
+    {
+        //delete Ngrams
+        $this->NgramModel->deleteNgramsByOriginalKeys($this->FileKeyInfoModel->where('file_id', $data['file_id'])->get());
+        //delete Keys
+        $this->FileKeyInfoModel->where('file_id', $data['file_id'])->delete();
+        //delete file
+        $this->FilesModel->where('id',$data['file_id'])->delete();
     }
 
     /**
@@ -121,7 +138,7 @@ class FuzzySearch
         $file_name      = $file->getClientOriginalName();
         $file_name      = pathinfo($file_name, PATHINFO_FILENAME);
         if (empty($file_extension)) {
-            $file_name = $file_name . "_" . $file_unique_id ;
+            $file_name = $file_name . "_" . $file_unique_id;
         } else {
             $file_name = $file_name . "_" . $file_unique_id . '.' . $file_extension;
         }
