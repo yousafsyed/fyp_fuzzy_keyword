@@ -9,6 +9,22 @@
                 <div class="panel-heading">Dashboard</div>
 
                 <div class="panel-body">
+                    @if(Session::has('message'))
+                        @if(stristr(Session::get('message'),'Error:') !== false)
+                        <div class="alert alert-danger text-center"  role="alert">
+                            <p>
+                                {{Session::get('message')}}
+                            </p>
+                        </div>
+                        @endif
+                        @if(stristr(Session::get('message'),'Success:') !== false)
+                        <div class="alert alert-success text-center"  role="alert">
+                            <p>
+                               {{Session::get('message')}}
+                            </p>
+                        </div>
+                        @endif
+                    @endif
                 <h3>List Of Files</h3>
                     {!! $files->links() !!}
                     <table class="table table-hover table-striped table-bordered">
@@ -21,7 +37,7 @@
                                     <td>{{$file->title}}</td>
                                     <td>{{$file->filename}}</td>
                                     <td>{{$file->created_at}}</td>
-                                    <td><a href="#">Download</a> <a href="{{ url('/dashboard/deletefile?file_id='.$file->id) }}">Delete</a></td>
+                                    <td><a href="{{ url('/download?file_id='.$file->id) }}">Download</a> <a href="{{ url('/dashboard/deletefile?file_id='.$file->id) }}">Delete</a></td>
                                 </tr>
                             @endforeach
                         </tbody>

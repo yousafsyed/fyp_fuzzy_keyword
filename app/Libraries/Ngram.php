@@ -85,7 +85,7 @@ class Ngram
         $String2 = array_unique(str_split($String2));
 
         #Get Union of  String1 and String2
-        $union = array_unique(array_merge((array) $String1, (array) $str2));
+        $union = array_unique(array_merge((array) $String1, (array) $String2));
         #Get Intersect of String1 and String2;
         $intersect = array_intersect((array) $String1, (array) $String2);
 

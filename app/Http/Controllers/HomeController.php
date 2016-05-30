@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\FilesModel;
 use App\Libraries\FuzzySearch;
 use Auth;
+use Crypt;
 use Illuminate\Http\Request;
 use Redirect;
-use Crypt;
+use Response;
+use Storage;
 
 class HomeController extends Controller
 {
@@ -30,10 +32,18 @@ class HomeController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request, FuzzySearch $FuzzySearch)
     {
-        $files = $this->FilesModel->where('user_id', '=', $this->UserData->id)->paginate(5);
-        return view('home')->with("files",$files);
+        $data = $request->all();
+
+        if (isset($data['q'])) {
+            $fileIds = $FuzzySearch->listFiles($data);
+            $files   = $this->FilesModel->whereIn('id', $fileIds)->where('user_id', '=', $this->UserData->id)->paginate(5);
+        } else {
+            $files = $this->FilesModel->where('user_id', '=', $this->UserData->id)->paginate(5);
+        }
+
+        return view('home')->with("files", $files);
     }
 
     public function addFile()
@@ -50,15 +60,45 @@ class HomeController extends Controller
             "tags"  => 'required',
         ]);
         $request_data = $request->all();
-        $response     = $FuzzySearch->addNewFile($request_data);
+        try {
+            $response = $FuzzySearch->addNewFile($request_data);
+        } catch (\Exception $e) {
+            $response = "Error:" . $e->getMessage();
+        }
         return Redirect::to('dashboard/addfile')->with('message', $response);
     }
 
-    public function deteteFile(Request $request,FuzzySearch $FuzzySearch)
+    public function DownloadFile(Request $request, FuzzySearch $FuzzySearch)
+    {
+
+        try {
+            $fileInfo = $FuzzySearch->getFile();
+
+            $file = Crypt::decrypt(Storage::get($fileInfo['path']));
+            $type = Storage::mimeType($fileInfo['path']);
+
+            $response = Response::make($file, 200);
+            $response->header("Content-Type", $type);
+            $response->header('Content-Disposition', 'attachment; filename="' . $fileInfo['name'] . '"');
+
+            return $response;
+        } catch (\Exception $e) {
+            return Redirect::to('home')->with('message', 'Error:' . $e->getMessage());
+        }
+
+    }
+
+    public function deteteFile(Request $request, FuzzySearch $FuzzySearch)
     {
 
         $request_data = $request->all();
-        $response     = $FuzzySearch->deleteFile($request_data);
+
+        try {
+            $response = $FuzzySearch->deleteFile($request_data);
+        } catch (\Exception $e) {
+            $response = "Error:" . $e->getMessage();
+        }
+
         return Redirect::to('home')->with('message', $response);
     }
 }

@@ -7,10 +7,12 @@ namespace App\Libraries;
 
 use App\FileKeyInfoModel;
 use App\FilesModel;
+use App\Libraries\FuzzyObject;
 use App\Libraries\Ngram;
 use App\NgramModel;
 use Auth;
 use Crypt;
+use Exception;
 use File;
 use Storage;
 
@@ -23,12 +25,13 @@ class FuzzySearch
     private $Ngram;
     private $FileKeyInfoModel;
     private $NgramModel;
+    private $fileInfo = null;
     /**
      *
      * @param FilesModel $FilesModel
      * @param Ngram      $Ngram
      */
-    public function __construct(FilesModel $FilesModel, Ngram $Ngram, FileKeyInfoModel $FileKeyInfoModel, NgramModel $NgramModel)
+    public function __construct(FilesModel $FilesModel, Ngram $Ngram, FileKeyInfoModel $FileKeyInfoModel, NgramModel $NgramModel, $fileId)
     {
         $this->user_data        = Auth::user();
         $this->user_id          = $this->user_data->id;
@@ -37,6 +40,44 @@ class FuzzySearch
         $this->Ngram            = $Ngram;
         $this->FileKeyInfoModel = $FileKeyInfoModel;
         $this->NgramModel       = $NgramModel;
+        if (!$this->checkFileAuth($fileId)) {
+            throw new Exception('Unauthorized action.');
+        }
+    }
+
+    /**
+     * [checkFileAuth Check the file if it belongs to current user other than that return false]
+     * @param  Integer $fileId file id from request
+     * @return Boolean
+     */
+    public function checkFileAuth($fileId)
+    {
+        if (is_numeric($fileId)) {
+            $this->fileInfo = $this->FilesModel->where('id', $fileId)->first();
+
+            if ($this->fileInfo == null || $this->fileInfo->user_id != $this->user_data->id) {
+                return false;
+            } else {
+                return true;
+            }
+
+        }
+        return true;
+    }
+    /**
+     * [getFile]
+     * @return Array       Array of data
+     */
+    public function getFile()
+    {
+        if ($this->fileInfo != null) {
+            return [
+                'path' => $this->file_dir_path . DIRECTORY_SEPARATOR . $this->fileInfo->filename,
+                'name' => $this->fileInfo->filename,
+            ];
+        } else {
+            throw new Exception('You are not authorized to download this file');
+        }
     }
     /**
      * [addNewFile]
@@ -53,22 +94,131 @@ class FuzzySearch
             $this->FileKeyInfoModel->addKeys($tags, $this->FilesModel->id);
             return "Success: File added Successfully";
         } else {
-            return "Error: Something went wrong please contact our support.";
+            throw new Exception("Something went wrong please contact support.");
         }
     }
+    /**
+     * [listFiles]
+     * @param  Array $data Request data array
+     * @return [type]
+     */
+    public function listFiles($data)
+    {
+        if (isset($data['q'])) {
+            $keys                    = explode(' ', $data['q']);
+            $countOfKeys             = count($keys);
+            $FuzzySet                = $this->FuzzySet($keys);
+            $JaccardCoefficientArray = $this->JaccardCoefficientForFuzzySet($FuzzySet);
+            $FuzzySetArray           = array();
+            $OriginalSetArray        = array();
+            $this->DivideFuzzyAndOriginalSets($FuzzySetArray, $OriginalSetArray, $FuzzySet);
+            $CorrectedKeys = $this->CorrectKeysByJaccardArray($keys, $JaccardCoefficientArray, $FuzzySetArray, $OriginalSetArray);
+            return $this->FileKeyInfoModel->FileIdsByKeys($CorrectedKeys);
+
+        }
+    }
+
+    public function DivideFuzzyAndOriginalSets(&$FuzzySetArray, &$OriginalSetArray, $FuzzySet)
+    {
+
+        foreach ($FuzzySet as $row) {
+            $FuzzySetArray[]    = $row->fuzzy_key;
+            $OriginalSetArray[] = $row->original_key;
+
+        }
+    }
+    public function CorrectKeysByJaccardArray($keys, &$JaccardCoefficientArray, &$FuzzySetArray, &$OriginalSetArray)
+    {
+        $correctedKeys = array();
+        $len           = count($JaccardCoefficientArray);
+        for ($i = 0; $i < count($keys); $i++) {
+            $max = -1;
+            for ($j = 0; $j < $len; $j++) {
+                if ($keys[$i] === $OriginalSetArray[$j]) {
+                    if ($max < $JaccardCoefficientArray[$j]) {
+                        $max               = $JaccardCoefficientArray[$j];
+                        $correctedKeys[$i] = $FuzzySetArray[$j];
+                    }
+                }
+
+            }
+            $max = -1;
+        }
+        return array_unique($correctedKeys, SORT_REGULAR);
+    }
+    public function FuzzySet($keys)
+    {
+        $FuzzySetArray = array();
+
+        foreach ($keys as $key) {
+            $ngrams = $this->Ngram->EncryptedNgrams($key);
+            foreach ($ngrams as $key2) {
+
+                $tmpFuzzySet = $this->NgramModel->getNgramsByKey($key2);
+                if ($tmpFuzzySet == null) {continue;}
+                $this->createFuzzyObject($tmpFuzzySet, $FuzzySetArray, $key);
+            }
+
+        }
+        return array_unique($FuzzySetArray, SORT_REGULAR);
+
+    }
+
+    public function createFuzzyObject($tmpFuzzySet, &$FuzzySetArray, $key)
+    {
+        foreach ($tmpFuzzySet as $key3) {
+            $FuzzyObject               = new FuzzyObject();
+            $FuzzyObject->original_key = $key;
+            $FuzzyObject->fuzzy_key    = $key3->original_key;
+            $FuzzySetArray[]           = $FuzzyObject;
+        }
+    }
+
+    public function JaccardCoefficientForFuzzySet($FuzzySet)
+    {
+        $JaccardCoefficientArray = array();
+        foreach ($FuzzySet as $row) {
+            $JaccardCoefficientArray[] = $this->Ngram->JaccardCoefficient($row->fuzzy_key, $row->original_key);
+        }
+        return $JaccardCoefficientArray;
+    }
+
     /**
      * [deleteFile]
      * @param  String $data
      * @return String
      */
-    public function deleteFile($data)
+    public function deleteFile()
     {
-        //delete Ngrams
-        $this->NgramModel->deleteNgramsByOriginalKeys($this->FileKeyInfoModel->where('file_id', $data['file_id'])->get());
-        //delete Keys
-        $this->FileKeyInfoModel->where('file_id', $data['file_id'])->delete();
-        //delete file
-        $this->FilesModel->where('id',$data['file_id'])->delete();
+
+        if ($this->fileInfo != null) {
+
+            $this->deleteFileFromStorage($this->fileInfo);
+            //delete FileKeys and return collections of deleted keys
+            $FileKeysCollection = $this->FileKeyInfoModel->deleteFileKeys($this->fileInfo);
+
+            //delete Ngrams based on Keys
+            $this->NgramModel->deleteNgramsByOriginalKeys($FileKeysCollection);
+
+            return "Success: File Deleted Successfully";
+        } else {
+            throw new Exception("File already deleted or donot exist");
+        }
+
+    }
+    /**
+     * [deleteFileFromStorage]
+     * @param  FileModel $fileInfo
+     * @return Void
+     */
+    public function deleteFileFromStorage(FilesModel $fileInfo)
+    {
+        $file_storage_path = $this->file_dir_path . DIRECTORY_SEPARATOR . $fileInfo->filename;
+        if (Storage::disk('local')->has($file_storage_path)) {
+            Storage::disk('local')->delete($file_storage_path);
+        }
+        //delete file from table
+        $fileInfo->delete();
     }
 
     /**

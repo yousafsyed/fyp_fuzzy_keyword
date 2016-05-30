@@ -22,3 +22,5 @@ Route::get('/dashboard', 'HomeController@index');
 Route::get('/dashboard/addfile', 'HomeController@addFile');
 Route::post('/dashboard/savefile', 'HomeController@saveFile');
 Route::get('/dashboard/deletefile', 'HomeController@deteteFile');
+
+Route::get('download', 'HomeController@DownloadFile');
