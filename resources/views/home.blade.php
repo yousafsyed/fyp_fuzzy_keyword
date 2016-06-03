@@ -6,7 +6,20 @@
       @include('sidebar')
           <div class="col-md-8">
             <div class="panel panel-default">
-                <div class="panel-heading">Dashboard</div>
+                <div class="panel-heading">
+
+                    <div class="right">
+                    <form action="{{ url('/home') }}" method="get" >
+                        <div class="input-group">
+                          <input type="text" class="form-control" name="q" placeholder="Fuzzy keyword Search here...">
+                          <span class="input-group-btn">
+                            <button class="btn btn-default" type="button">Go!</button>
+                            <a class="btn btn-default" href="{{ url('/home') }}">Clear</a>
+                          </span>
+                        </div>
+                    </form>
+                    </div>
+                </div>
 
                 <div class="panel-body">
                     @if(Session::has('message'))
