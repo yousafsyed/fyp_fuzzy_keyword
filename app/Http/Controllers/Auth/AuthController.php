@@ -53,9 +53,10 @@ class AuthController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
-            'name'     => 'required|max:255',
-            'email'    => 'required|email|max:255|unique:users',
-            'password' => 'required|min:6|confirmed',
+            'name'                 => 'required|max:255',
+            'email'                => 'required|email|max:255|unique:users',
+            'password'             => 'required|min:6|confirmed',
+            'g-recaptcha-response' => 'required|captcha',
         ]);
     }
 
@@ -98,14 +99,14 @@ class AuthController extends Controller
 
     /**
      * Override function
-     * @param  Request $request 
-     * @param  User  $user    
-     * @return            
+     * @param  Request $request
+     * @param  User  $user
+     * @return
      */
     public function authenticated(Request $request, $user)
     {
         if (!$user->verified) {
-           
+
             auth()->logout();
             return back()->with('warning', 'You need to confirm your account. We have sent you an activation code, please check your email.');
         }

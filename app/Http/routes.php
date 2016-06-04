@@ -10,7 +10,6 @@
 | and give it the controller to call when that URI is requested.
 |
  */
-use App\Http\Controllers\Auth\AuthController;
 Route::get('/', function () {
     return view('welcome');
 });
@@ -25,3 +24,8 @@ Route::get('/dashboard/deletefile', 'HomeController@deteteFile');
 
 Route::get('download', 'HomeController@DownloadFile');
 Route::get('register/confirm/{token}', 'UserController@confirmEmail');
+
+Route::group(['middleware' => 'web'], function () {
+    Route::get('contact', 'ContactController@getContact');
+    Route::post('contact', 'ContactController@postContact');
+});
