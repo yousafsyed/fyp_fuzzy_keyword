@@ -7,8 +7,8 @@ use App\Mailers\AppMailer;
 use App\User;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
-use Validator;
 use Illuminate\Http\Request;
+use Validator;
 
 class AuthController extends Controller
 {
@@ -96,13 +96,5 @@ class AuthController extends Controller
         return redirect('/login')->with('status', 'We sent you an activation code. Check your email.');
     }
 
-    public function authenticated(Request $request, $user)
-    {
-        if (!$user->verified) {
-            $this->AppMailer->sendEmailConfirmationTo($user);
-            auth()->logout();
-            return back()->with('warning', 'You need to confirm your account. We have sent you an activation code, please check your email.');
-        }
-        return redirect()->intended($this->redirectPath());
-    }
+  
 }
