@@ -69,6 +69,13 @@
                         <div class="form-group">
                             <div class="col-md-6 col-md-offset-4">
                                 {!! app('captcha')->display(); !!}
+
+                                @if ($errors->has('g-recaptcha-response'))
+                                    <span class="help-block has-error">
+                                        <strong>{{ $errors->first('g-recaptcha-response') }}</strong>
+                                    </span>
+                                @endif
+                         
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fa fa-btn fa-user"></i>Register
                                 </button>
