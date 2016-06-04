@@ -71,11 +71,11 @@
                                 {!! app('captcha')->display(); !!}
 
                                 @if ($errors->has('g-recaptcha-response'))
-                                    <span class="help-block has-error">
+                                    <span class="help-block" style="color:#a94442">
                                         <strong>{{ $errors->first('g-recaptcha-response') }}</strong>
                                     </span>
                                 @endif
-                         
+                                <br>
                                 <button type="submit" class="btn btn-primary">
                                     <i class="fa fa-btn fa-user"></i>Register
                                 </button>
