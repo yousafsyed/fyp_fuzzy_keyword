@@ -2,6 +2,7 @@
 
 namespace App;
 
+use Crypt;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class User extends Authenticatable
@@ -23,4 +24,29 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+
+    /**
+     * Boot the model.
+     *
+     * @return void
+     */
+    public static function boot()
+    {
+        parent::boot();
+        static::creating(function ($user) {
+            $user->token = Crypt::encrypt(str_random(8));
+        });
+    }
+
+    /**
+     * Confirm the user.
+     *
+     * @return void
+     */
+    public function confirmEmail()
+    {
+        $this->verified = true;
+        $this->token    = null;
+        $this->save();
+    }
 }

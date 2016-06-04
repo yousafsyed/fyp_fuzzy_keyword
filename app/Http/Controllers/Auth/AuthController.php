@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\User;
-use Validator;
 use App\Http\Controllers\Controller;
-use Illuminate\Foundation\Auth\ThrottlesLogins;
+use App\Mailers\AppMailer;
+use App\User;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
+use Illuminate\Foundation\Auth\ThrottlesLogins;
+use Validator;
+use Illuminate\Http\Request;
 
 class AuthController extends Controller
 {
@@ -19,7 +21,8 @@ class AuthController extends Controller
     | authentication of existing users. By default, this controller uses
     | a simple trait to add these behaviors. Why don't you explore it?
     |
-    */
+     */
+    private $AppMailer;
 
     use AuthenticatesAndRegistersUsers, ThrottlesLogins;
 
@@ -35,9 +38,10 @@ class AuthController extends Controller
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(AppMailer $AppMailer)
     {
         $this->middleware($this->guestMiddleware(), ['except' => 'logout']);
+        $this->AppMailer = $AppMailer;
     }
 
     /**
@@ -49,8 +53,8 @@ class AuthController extends Controller
     protected function validator(array $data)
     {
         return Validator::make($data, [
-            'name' => 'required|max:255',
-            'email' => 'required|email|max:255|unique:users',
+            'name'     => 'required|max:255',
+            'email'    => 'required|email|max:255|unique:users',
             'password' => 'required|min:6|confirmed',
         ]);
     }
@@ -64,9 +68,41 @@ class AuthController extends Controller
     protected function create(array $data)
     {
         return User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
+            'name'     => $data['name'],
+            'email'    => $data['email'],
             'password' => bcrypt($data['password']),
         ]);
+    }
+
+    /**
+     * Override Register function and add email confirmation functionality
+     * @param  Request $request
+     * @return
+     */
+    public function register(Request $request)
+    {
+        $validator = $this->validator($request->all());
+
+        if ($validator->fails()) {
+            $this->throwValidationException(
+                $request, $validator
+            );
+        }
+
+        $user = $this->create($request->all());
+
+        $this->AppMailer->sendEmailConfirmationTo($user);
+
+        return redirect('/login')->with('status', 'We sent you an activation code. Check your email.');
+    }
+
+    public function authenticated(Request $request, $user)
+    {
+        if (!$user->verified) {
+            $this->AppMailer->sendEmailConfirmationTo($user);
+            auth()->logout();
+            return back()->with('warning', 'You need to confirm your account. We have sent you an activation code, please check your email.');
+        }
+        return redirect()->intended($this->redirectPath());
     }
 }
