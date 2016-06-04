@@ -96,5 +96,20 @@ class AuthController extends Controller
         return redirect('/login')->with('status', 'We sent you an activation code. Check your email.');
     }
 
-  
+    /**
+     * Override function
+     * @param  Request $request 
+     * @param  User  $user    
+     * @return            
+     */
+    public function authenticated(Request $request, $user)
+    {
+        if (!$user->activated) {
+            $this->activationService->sendActivationMail($user);
+            auth()->logout();
+            return back()->with('warning', 'You need to confirm your account. We have sent you an activation code, please check your email.');
+        }
+        return redirect()->intended($this->redirectPath());
+    }
+
 }
