@@ -5,7 +5,7 @@ Fuzzy keyword search greatly enhances system usability by returning the matching
 Through rigorous security analysis, we show that our proposed solution is secure and privacypreserving, while correctly realizing the goal of fuzzy keyword search. Extensive experimental results demonstrate the efficiency of the proposed solution
 
 ## Intended use
-This project is inttended for educational purpose. Its my final year project for Don Bosco Univerity
+This project is just for educational purpose. Its my final year project for Don Bosco Univerity
 
 ## License
 
