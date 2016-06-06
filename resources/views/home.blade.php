@@ -13,7 +13,7 @@
                         <div class="input-group">
                           <input type="text" class="form-control" name="q" placeholder="Fuzzy keyword Search here...">
                           <span class="input-group-btn">
-                            <button class="btn btn-default" type="button">Go!</button>
+                            <button class="btn btn-default" type="submit">Go!</button>
                             <a class="btn btn-default" href="{{ url('/home') }}">Clear</a>
                           </span>
                         </div>
