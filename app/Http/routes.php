@@ -25,7 +25,3 @@ Route::get('/dashboard/deletefile', 'HomeController@deteteFile');
 Route::get('download', 'HomeController@DownloadFile');
 Route::get('register/confirm/{token}', 'UserController@confirmEmail');
 
-Route::group(['middleware' => 'web'], function () {
-    Route::get('contact', 'ContactController@getContact');
-    Route::post('contact', 'ContactController@postContact');
-});
