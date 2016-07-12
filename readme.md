@@ -1,17 +1,49 @@
-# Fuzzy Keyword search on encrypted data in cloud
+# laravel-jenkins
 
-As Cloud Computing becomes prevalent, more and more sensitive information are being centralized into the cloud. Although traditional searchable encryption schemes allow a user to securely search over encrypted data through keywords and selectively retrieve files of interest, these techniques support only exact keyword search. In this paper, for the first time we formalize and solve the problem of effective fuzzy keyword search over encrypted cloud data while maintaining keyword privacy. 
-Fuzzy keyword search greatly enhances system usability by returning the matching files when users’ searching inputs exactly match the predefined keywords or the closest possible matching files based on keyword similarity semantics, when exact match fails. In our solution, we exploit edit distance to quantify keywords similarity and develop two advanced techniques on constructing fuzzy keyword sets, which achieve optimized storage and representation overheads. We further propose a brand new symbol-based trie-traverse searching scheme, where a multi-way tree structure is built up using symbols transformed from the resulted fuzzy keyword sets. 
-Through rigorous security analysis, we show that our proposed solution is secure and privacypreserving, while correctly realizing the goal of fuzzy keyword search. Extensive experimental results demonstrate the efficiency of the proposed solution
+Boilerplate for setting up continuous integration of [Laravel 4](http://www.laravel.com/) using [Jenkins](http://www.jenkins-ci.org)
 
-## Intended use
-This project is just for educational purpose. Its my final year project for Don Bosco Univerity
+We did not want to delete and recreate the vendor folder everytime that the script was ran, so "composer update" is ran if the vendor folder exist--otherwise "composer install" is ran.  In order to force a clean vendor folder, you can run one of the builds with the "-clean"…
 
-## License
+	ant build-clean
+	OR
+	ant build-parallel-clean
 
-This project is open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT).
 
-## Author
-Yousaf Syed
-mmesunny@gmail.com
+### Build Targets
+Here are the list of build targets that are defined within the build.xml:
 
+* build *(DEFAULT)*
+* build-clean
+* build-parallel
+* build-parallel-clean
+* build-common
+* tools-parallel - Run tools in parallel
+* clean - Cleanup build and composer artifacts
+* clean-build - Cleanup build artifacts
+* clean-composer - Cleanup composer artifacts
+* composer - Install or update dependencies
+* composer.check
+* composer-install - Installing dependencies
+* composer-update - Updating dependencies
+* lint - Perform syntax check of sourcecode files
+* pdepend - Calculate software metrics using PHP_Depend
+* phpcb - Aggregate tool output with PHP_CodeBrowser
+* phpcpd - Find duplicate code using PHPCPD
+* phpcs - Find coding standard violations using PHP_CodeSniffer and print human readable output. Intended for usage on the command line before committing
+* phpcs-ci - Find coding standard violations using PHP_CodeSniffer creating a log file for the continuous integration server
+* phpdox - Generate API documentation using phpDox
+* phploc - Measure project size using PHPLOC
+* phpmd - Perform project mess detection using PHPMD and print human readable output. Intended for usage on the command line before committing.
+* phpmd-ci - Perform project mess detection using PHPMD creating a log file for the continuous integration server
+* phpunit - Run unit tests with PHPUnit
+* prepare - Prepare for build
+* storage-permissions - Setting storage permissions
+* storage-permissions.unix - Setting storage permissions on unix
+* storage-permissions.windows - Setting storage permissions on windows
+* storage.unix.check - Check for app/storage on unix
+* storage.windows.check - Check for app/storage on windows
+
+### References
+This boilerplate comes from glueing together a collection of post on the internet
+* [https://modess.io/continuous-integration-for-laravel-with-jenkins-and-git/](https://modess.io/continuous-integration-for-laravel-with-jenkins-and-git/)
+* [http://chris.schalenborgh.be/2013/04/05/deploy-php-projects-jenkins-os/](http://chris.schalenborgh.be/2013/04/05/deploy-php-projects-jenkins-os/)
