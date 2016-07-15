@@ -9,7 +9,7 @@ namespace App\Libraries;
 class FuzzyObject
 {
     public $fuzzy_key;
-    public $original_key;
+    public $original_key
 
     
 }
