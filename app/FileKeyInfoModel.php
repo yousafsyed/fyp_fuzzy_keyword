@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App
 
 use Crypt;
 use Illuminate\Database\Eloquent\Model;
